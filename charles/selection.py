@@ -29,14 +29,15 @@ def fps(population):
         total_fitness = sum([i.fitness for i in population])
         # sorting the pop in ascending manner
         sort_pop = sorted(population, key=attrgetter("fitness"), reverse=False)
-        prop_fitness = [1/(i / total_fitness) for i in sort_pop]
-        return choices(population=sort_pop, weights=prop_fitness, k=1)[0]
+        prop_fitness = [1 / (sort_pop[i].fitness / total_fitness) for i in range(len(sort_pop))]
+        indiv = choices(population=sort_pop, weights=prop_fitness, k=1)[0]
+        return indiv
 
     else:
         raise Exception("No optimization specified (min or max).")
 
 
-def tournament(population, size=10):
+def tournament(population, size=30):
     """Tournament selection implementation.
 
     Args:
@@ -79,3 +80,5 @@ def rank(population):
     #calculating the propability of being selected.
     prop_fitness = [(i+1)/total_rank for i in range(len(population))]
     return choices(population=sort_pop, weights=prop_fitness, k=1)[0]
+
+

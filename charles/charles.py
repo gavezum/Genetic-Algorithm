@@ -98,6 +98,7 @@ class Population:
             elif self.optim == "min":
                 best_fitness.append(min(self, key=attrgetter("fitness")).fitness)
 
+
         return best_fitness
 
     def __len__(self):
