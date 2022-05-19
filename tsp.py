@@ -7,7 +7,7 @@ from charles.mutation import swap_mutation, inversion_mutation,center_inverse_mu
 from charles.crossover import cycle_co, pmx_co, order_x1_co
 from matplotlib import pyplot as plt
 import numpy as np
-
+from copy import deepcopy
 
 def get_fitness(self):
     """A simple objective function to calculate distances
@@ -42,8 +42,12 @@ def get_neighbours(self):
 Individual.get_fitness = get_fitness
 Individual.get_neighbours = get_neighbours
 
-def evolve(population,gen,select,crossover,mutate,prob_mut,elit=True ):
+def evolve(population,gen,select,crossover,mutate,prob_mut,optim_op,elit=True ):
     fitness_eval = []
+    if optim_op == 'max':
+        best_fit = 0
+    elif optim_op == 'min':
+        best_fit= 99e99
     for _ in range(0,50):
 
         pop = Population(
@@ -51,35 +55,45 @@ def evolve(population,gen,select,crossover,mutate,prob_mut,elit=True ):
             sol_size=len(distance_matrix[0]),
             valid_set=[j for j in range(len(distance_matrix[0]))],
             replacement=False,
-            optim="min",
+            optim=optim_op,
         )
 
-        fitness_eval.append(pop.evolve(
+        pop_envolve, best_sol =pop.evolve(
             gens=gen,
             select=select,
             crossover=crossover,
             mutate=mutate,
-            co_p=cros_prob,
+            co_p=0.90,
             mu_p=prob_mut,
             elitism=True
-                 ))
-        #print(i)
+                 )
+
+        fitness_eval.append(pop_envolve)
+
+        if (optim_op == "max") & (best_sol.fitness > best_fit):
+            elit = deepcopy(best_sol)
+        elif (optim_op == "min") & (best_sol.fitness < best_fit):
+            elit = deepcopy(best_sol)
+
+        best_fit = elit.fitness
     fitness_mean = np.mean(fitness_eval, axis=0)
     fitness_mean = [k / 1000 for k in fitness_mean]
-    return fitness_mean
-print(1)
-mean_orderx1_tournament=evolve(120,350,tournament,order_x1_co,inversion_mutation,0.1)
-print(1)
-mean_orderx1_tournament_elitf=evolve(120,350,tournament,order_x1_co,inversion_mutation,0.2)
-#mean_orderx1_fps =evolve(120,350,fps,order_x1_co,inversion_mutation)
+
+    return fitness_mean, elit
+
+#mean_pmx=evolve(120,350,tournament,pmx_co,inversion_mutation, 'min' ,0.1)
+mean_o1,best_sol=evolve(120,350,tournament,order_x1_co,inversion_mutation,0.2,'min')
+#mean_cycle=evolve(120,350,tournament,cycle_co,inversion_mutation,'min',0.1)
 
 
 
-plt.plot(mean_orderx1_tournament,'g')
-plt.plot(mean_orderx1_tournament_elitf,'r')
-plt.xticks(range(1,len(mean_orderx1_tournament),50))
+
+plt.plot(mean_pmx,'g')
+plt.plot(mean_o1,'b')
+plt.plot(mean_cycle,'r')
+plt.xticks(range(1,len(mean_pmx),50))
 plt.xlabel('Generation')
 plt.ylabel('Fitness in Thousands')
-plt.title('Different Mutation Probabilities')
-plt.legend(['P_mu = 0.1','P_mu = 0.2'])
+plt.title('Different cross over algorithms')
+plt.legend(['PMX','O1','Cycle'])
 plt.show()

@@ -70,32 +70,26 @@ def pmx_co(p1, p2):
     co_points = sample(range(len(p1)), 2)
     co_points.sort()
 
-    # dictionary creation using the segment elements from both parents
-    # the dictionary will be working two ways
-    keys = p1[co_points[0]:co_points[1]] + p2[co_points[0]:co_points[1]]
-    values = p2[co_points[0]:co_points[1]] + p1[co_points[0]:co_points[1]]
-    # segment dictionary
-    segment = {keys[i]: values[i] for i in range(len(keys))}
-
-    # empty offsprings
-    o1 = [None] * len(p1)
-    o2 = [None] * len(p2)
-
     # where pmx happens
-    def pmx(o, p):
-        for i, element in enumerate(p):
-            # if element not in the segment, copy
-            if element not in segment:
-                o[i] = p[i]
-            # if element in the segment, take the value of the key from
-            # segment/dictionary
-            else:
-                o[i] = segment.get(element)
+    def pmx(x, y):
+        o = [None]*len(x)
+        o[co_points[0]:co_points[1]] = x[co_points[0]:co_points[1]]
+
+        z = set(y[co_points[0]:co_points[1]]) - set(x[co_points[0]:co_points[1]])
+        for i in z:
+            temp = i
+            index = y.index(x[y.index(temp)])
+            while o[index] != None:
+                temp = index
+                index = y.index(x[temp])
+            o[index] = i
+
+        while None in o:
+            index = o.index(None)
+            o[index] = y[index]
         return o
 
-    # repeat the procedure for each offspring
-    o1 = pmx(o1, p1)
-    o2 = pmx(o2, p2)
+    o1, o2 = pmx(p1,p2), pmx(p2,p1)
     return o1, o2
 
 

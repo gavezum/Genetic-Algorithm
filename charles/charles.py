@@ -95,11 +95,11 @@ class Population:
 
             if self.optim == "max":
                 best_fitness.append(max(self, key=attrgetter("fitness")).fitness)
+
             elif self.optim == "min":
                 best_fitness.append(min(self, key=attrgetter("fitness")).fitness)
 
-
-        return best_fitness
+        return best_fitness, elite
 
     def __len__(self):
         return len(self.individuals)
